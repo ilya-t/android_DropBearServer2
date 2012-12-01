@@ -68,27 +68,23 @@ public abstract class ServerUtils {
 	}
 
 	// WARNING: this is not threaded
-	public static final Boolean isDropbearRunning() {
+	public static final Boolean isDropbearRunning(Context context) {
 		dropbearRunning = false;
 		try {
-			Process suProcess = Runtime.getRuntime().exec("su");
+			File pidFile = new File(ServerUtils.getLocalDir(context) + "/pid");
 
-			// stdin
-			DataOutputStream stdin = new DataOutputStream(suProcess.getOutputStream());
-			L.d("# ps dropbear");
-			stdin.writeBytes("ps dropbear\n");
-			stdin.flush();
-			stdin.writeBytes("exit\n");
-			stdin.flush();
+			if (!pidFile.isFile()) return false;
 
-			// stdout
-			BufferedReader reader = new BufferedReader(new InputStreamReader(suProcess.getInputStream()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (line.endsWith("dropbear") == true) {
-					dropbearRunning = true;
-					return dropbearRunning;
-				}
+			BufferedReader br = new BufferedReader(new FileReader(pidFile));
+			String pidStr = br.readLine();
+			br.close();
+
+			if (pidStr == null || !pidStr.matches("[0-9]+")) return false;
+
+			File procDir = new File("/proc/" + pidStr);
+
+			if (procDir.isDirectory()) {
+				dropbearRunning = true;
 			}
 		}
 		catch (IOException e) {

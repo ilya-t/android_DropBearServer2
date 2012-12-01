@@ -32,7 +32,7 @@ public class Checker extends Task {
 		publishProgress("" + step++, "" + steps, "DropBear");
 		RootUtils.checkDropbear(mContext);
 
-		ServerUtils.isDropbearRunning();
+		ServerUtils.isDropbearRunning(mContext);
 
 		ServerUtils.getIpAddresses(mContext);
 
