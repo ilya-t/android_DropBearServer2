@@ -73,7 +73,7 @@ public class SshHelper {
                 isChecked = true;
 
                 if (completeListener != null){
-                    completeListener.onTaskCompleted(result);
+                    completeListener.onTaskCompleted(null, result, null);
                 }
             }
         }).execute();
@@ -89,7 +89,7 @@ public class SshHelper {
             @Override
             public void onTaskComplete(int id, Boolean result) {
                 if (completeListener != null){
-                    completeListener.onTaskCompleted(result);
+                    completeListener.onTaskCompleted(null, result, null);
                 }
             }
         }).execute();
@@ -104,7 +104,7 @@ public class SshHelper {
             @Override
             public void onTaskComplete(int id, Boolean result) {
                 if (completeListener != null){
-                    completeListener.onTaskCompleted(result);
+                    completeListener.onTaskCompleted(null, result, null);
                 }
             }
         }, false).execute();
@@ -115,7 +115,7 @@ public class SshHelper {
             @Override
             public void onTaskComplete(int id, Boolean result) {
                 if (completeListener != null){
-                    completeListener.onTaskCompleted(result);
+                    completeListener.onTaskCompleted(null, result,null);
                 }
             }
         }, false).execute();
@@ -126,7 +126,7 @@ public class SshHelper {
             @Override
             public void onTaskComplete(int id, Boolean result) {
                 if (completeListener != null){
-                    completeListener.onTaskCompleted(result);
+                    completeListener.onTaskCompleted(null, result, null);
                 }
             }
         }).execute();
