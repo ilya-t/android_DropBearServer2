@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 
+import com.tsourcecode.srv.ssh.SshConfig;
+
 import me.shkschneider.dropbearserver2.task.Starter;
 import me.shkschneider.dropbearserver2.task.Task.Callback;
 import me.shkschneider.dropbearserver2.util.L;
@@ -16,8 +18,9 @@ public class MainReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(final Context context, Intent intent) {
 		L.d(intent.getAction());
+        SshConfig config = new SshConfig(context);
 
-		if (LocalPreferences.getBoolean(context, LocalPreferences.PREF_START_BOOT, LocalPreferences.PREF_START_BOOT_DEFAULT) == true) {
+		if (config.startOnBoot()) {
 			L.d("Handler: +" + PAUSE + "s");
 			Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {

@@ -5,7 +5,8 @@ package me.shkschneider.dropbearserver2.task;
 
 import android.content.Context;
 
-import me.shkschneider.dropbearserver2.LocalPreferences;
+import com.tsourcecode.srv.ssh.SshConfig;
+
 import me.shkschneider.dropbearserver2.util.L;
 import me.shkschneider.dropbearserver2.util.ServerUtils;
 import me.shkschneider.dropbearserver2.util.ShellUtils;
@@ -21,7 +22,7 @@ public class Starter extends Task {
 	@Override
 	protected Boolean doInBackground(Void... params) {
 		String login = "root";
-		String passwd = LocalPreferences.getString(mContext, LocalPreferences.PREF_PASSWORD, LocalPreferences.PREF_PASSWORD_DEFAULT);
+        SshConfig config = new SshConfig(mContext);
 		String banner = ServerUtils.getLocalDir(mContext) + "/banner";
 		String hostRsa = ServerUtils.getLocalDir(mContext) + "/host_rsa";
 		String hostDss = ServerUtils.getLocalDir(mContext) + "/host_dss";
@@ -31,10 +32,9 @@ public class Starter extends Task {
 
 		String command = ServerUtils.getLocalDir(mContext) + "/dropbear";
 		command = command.concat(" -A -N " + login);
-		if (LocalPreferences.getBoolean(mContext, LocalPreferences.PREF_ALLOW_PASSWORD, LocalPreferences.PREF_ALLOW_PASSWORD_DEFAULT)) {
-			command = command.concat(" -C " + passwd);
-		}
-		else {
+		if (config.isAllowPassword()) {
+			command = command.concat(" -C " + config.getPassword());
+		}else{
 			command = command.concat(" -s");
 		}
 		command = command.concat(" -r " + hostRsa + " -d " + hostDss);

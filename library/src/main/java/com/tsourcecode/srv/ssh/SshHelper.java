@@ -24,16 +24,16 @@ public class SshHelper {
         NO_BUSY_BOX,
         NOT_INSTALLED,
         STARTED,
-        STOPPED
+        STOPPED;
     }
     private Status status = Status.UNKNOWN;
-
-
+    private SshConfig sshConfig;
     private final Context context;
-    private boolean isChecked;
 
+    private boolean isChecked;
     public SshHelper(Context context) {
         this.context = context.getApplicationContext();
+        sshConfig = new SshConfig(context);
         check(null);
     }
 
@@ -83,7 +83,6 @@ public class SshHelper {
         return status;
     }
 
-
     public void install(final TaskCompleteListener completeListener){
         new Installer(context, new Task.Callback<Boolean>() {
             @Override
@@ -94,6 +93,7 @@ public class SshHelper {
             }
         }).execute();
     }
+
 
     public String getVerion(){
         return ServerUtils.dropbearVersion;
@@ -164,5 +164,9 @@ public class SshHelper {
         }else {
             Toast.makeText(context, "No pubkeys to remove", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void setConfig(SshConfig sshConfig) {
+        this.sshConfig = sshConfig;
     }
 }
