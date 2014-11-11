@@ -1,10 +1,6 @@
 package com.tsourcecode.srv.ssh;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -132,38 +128,16 @@ public class SshHelper {
         }).execute();
     }
 
-    public void addPublicKey(){
-        //TODO implement later
+    public boolean addPublicKey(String publicKey){
+        List<String> publicKeys = ServerUtils.getPublicKeys(ServerUtils.getLocalDir(context) + "/authorized_keys");
+        if (!publicKeys.contains(publicKey)) {
+            return ServerUtils.addPublicKey(publicKey, ServerUtils.getLocalDir(context) + "/authorized_keys");
+        }
+        return false;
     }
 
-    public void removePublicKey(){
-        final List<String> pubKeys = ServerUtils.getPublicKeys(ServerUtils.getLocalDir(context) + "/authorized_keys");
-        if (pubKeys.size() > 0) {
-            AlertDialog alertDialog = new AlertDialog.Builder(context).setSingleChoiceItems(pubKeys.toArray(new String[pubKeys.size()]), 0, null).create();
-            alertDialog.setCancelable(false);
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.setIcon(android.R.drawable.ic_dialog_info);
-            alertDialog.setTitle("Remove a pubkey");
-            alertDialog.setMessage(null);
-            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-
-                //@Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            });
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-
-                //@Override
-                public void onClick(DialogInterface dialog, int which) {
-                    ListView listView = ((AlertDialog) dialog).getListView();
-                    ServerUtils.removePublicKey(pubKeys.get((int) listView.getSelectedItemId()), ServerUtils.getLocalDir(context) + "/authorized_keys");
-                    Toast.makeText(context, "Pubkey removed", Toast.LENGTH_SHORT).show();
-                }
-            });
-            alertDialog.show();
-        }else {
-            Toast.makeText(context, "No pubkeys to remove", Toast.LENGTH_SHORT).show();
-        }
+    public boolean removePublicKey(String publicKey){
+        return ServerUtils.removePublicKey(publicKey, ServerUtils.getLocalDir(context) + "/authorized_keys");
     }
 
     public void setConfig(SshConfig sshConfig) {
