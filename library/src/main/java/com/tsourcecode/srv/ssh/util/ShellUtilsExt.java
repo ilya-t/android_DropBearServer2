@@ -32,7 +32,7 @@ public class ShellUtilsExt extends ShellUtils {
         });
     }
 
-    private static void execute(CommandCapture command) {
+    public static void execute(CommandCapture command) {
         try {
             RootTools.getShell(true).add(command);
         } catch (IOException | TimeoutException e) {

@@ -2,13 +2,14 @@ package com.tsourcecode.srv.ssh;
 
 import android.content.Context;
 
+import com.tsourcecode.srv.ssh.task.InstallTask;
+import com.tsourcecode.srv.ssh.util.AsyncResult;
+import com.tsourcecode.srv.ssh.util.ShellUtilsExt;
+
 import java.util.List;
 
 import me.shkschneider.dropbearserver2.task.Checker;
-import me.shkschneider.dropbearserver2.task.Installer;
 import me.shkschneider.dropbearserver2.task.Remover;
-import me.shkschneider.dropbearserver2.task.Starter;
-import me.shkschneider.dropbearserver2.task.Stopper;
 import me.shkschneider.dropbearserver2.task.Task;
 import me.shkschneider.dropbearserver2.util.RootUtils;
 import me.shkschneider.dropbearserver2.util.ServerUtils;
@@ -79,34 +80,51 @@ public class SshHelper {
         return status;
     }
 
-    public void install(final TaskCompleteListener completeListener){
-        new Installer(context, new Task.Callback<Boolean>() {
-            @Override
-            public void onTaskComplete(int id, Boolean result) {
-                if (completeListener != null){
-                    completeListener.onTaskCompleted(null, result, null);
-                }
-            }
-        }).execute();
+    public void install(AsyncResult installResult){
+        new InstallTask(installResult, context);
     }
-
 
     public String getVerion(){
         return ServerUtils.dropbearVersion;
     }
 
-    public void start(final TaskCompleteListener completeListener){
-        new Starter(context, new Task.Callback<Boolean>() {
-            @Override
-            public void onTaskComplete(int id, Boolean result) {
-                if (completeListener != null){
-                    completeListener.onTaskCompleted(null, result, null);
-                }
-            }
-        }, false).execute();
-    }
+    public void start(final AsyncResult result){//final TaskCompleteListener completeListener){
+        final int ID_ROOT = 0;
+        String login = "root";
+        SshConfig config = new SshConfig(context);
+        String banner = ServerUtils.getLocalDir(context) + "/banner";
+        String hostRsa = ServerUtils.getLocalDir(context) + "/host_rsa";
+        String hostDss = ServerUtils.getLocalDir(context) + "/host_dss";
+        String authorizedKeys = ServerUtils.getLocalDir(context) + "/authorized_keys";
+        Integer listeningPort = 22;
+        String pidFile = ServerUtils.getLocalDir(context) + "/pid";
 
-    public void stop(final TaskCompleteListener completeListener){
+        String command = ServerUtils.getLocalDir(context) + "/dropbear";
+        command = command.concat(" -A -N " + login);
+        if (config.isAllowPassword()) {
+            command = command.concat(" -C " + config.getPassword());
+        }else{
+            command = command.concat(" -s");
+        }
+        command = command.concat(" -r " + hostRsa + " -d " + hostDss);
+        command = command.concat(" -R " + authorizedKeys);
+        command = command.concat(" -U " + ID_ROOT + " -G " + ID_ROOT);
+        command = command.concat(" -p " + listeningPort);
+        command = command.concat(" -P " + pidFile);
+        command = command.concat(" -b " + banner);
+
+        ShellUtilsExt.execute(new OutputCommand(0, command){
+            @Override
+            public void commandCompleted(int id, int exitcode) {
+                super.commandCompleted(id, exitcode);
+                result.onResult(exitcode == 0, toString());
+            }
+        });
+}
+
+    public void stop(AsyncResult result){
+        ShellUtilsExt.killall("dropbear", result);
+/*
         new Stopper(context, new Task.Callback<Boolean>() {
             @Override
             public void onTaskComplete(int id, Boolean result) {
@@ -115,6 +133,7 @@ public class SshHelper {
                 }
             }
         }, false).execute();
+*/
     }
 
     public void remove(final TaskCompleteListener completeListener){
@@ -142,5 +161,9 @@ public class SshHelper {
 
     public void setConfig(SshConfig sshConfig) {
         this.sshConfig = sshConfig;
+    }
+
+    public boolean isRunning(){
+        return false;
     }
 }
